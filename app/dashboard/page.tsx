@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { AddTestActivityButton, LogoutButton } from "./buttons";
@@ -14,7 +15,27 @@ type ActivityRow = {
 
 const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
-export default async function DashboardPage() {
+// The page reads login cookies, so it can't be built ahead of time. Wrapping it
+// in <Suspense> lets Next.js prerender the loading shell and stream the rest.
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <Dashboard />
+    </Suspense>
+  );
+}
+
+function DashboardLoading() {
+  return (
+    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+      <p role="status" className="text-zinc-500 dark:text-zinc-400">
+        Loading…
+      </p>
+    </main>
+  );
+}
+
+async function Dashboard() {
   const supabase = await createClient();
 
   // Backup check in case proxy.ts didn't run.
