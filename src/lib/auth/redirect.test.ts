@@ -23,6 +23,21 @@ describe("authRedirect", () => {
     expect(authRedirect("/dashboards", false)).toBeNull();
   });
 
+  test("signed-out visitors on /activities go to /login", () => {
+    expect(authRedirect("/activities", false)).toBe("/login");
+    expect(authRedirect("/activities/new", false)).toBe("/login");
+  });
+
+  test("signed-in teachers on /activities stay", () => {
+    expect(authRedirect("/activities/new", true)).toBeNull();
+  });
+
+  test("student links and look-alikes stay public", () => {
+    expect(authRedirect("/a/abc123", false)).toBeNull();
+    expect(authRedirect("/a", false)).toBeNull();
+    expect(authRedirect("/activitiesx", false)).toBeNull();
+  });
+
   test("other pages are left alone", () => {
     expect(authRedirect("/", false)).toBeNull();
     expect(authRedirect("/", true)).toBeNull();
