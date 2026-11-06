@@ -14,7 +14,7 @@ Next.js (App Router) + TypeScript + Tailwind + Supabase + Zod. Tests: Vitest.
 - Sample activities for fake mode: src/lib/samples.ts
 - Supabase clients: src/lib/supabase/
 - AI code (server only): src/lib/ai/
-
+- Database SQL: supabase/schema.sql
 ## Commands
 - Run: npm run dev
 - Lint: npm run lint
