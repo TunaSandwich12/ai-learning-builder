@@ -6,7 +6,11 @@ vi.mock("@/src/lib/supabase/server", () => ({
   createClient: async () => ({ auth: { getClaims } }),
 }));
 
-const { POST } = await import("./route");
+// Never reach the real AI module from route tests.
+const generateActivity = vi.fn();
+vi.mock("@/src/lib/ai/generate", () => ({ generateActivity }));
+
+const { POST, maxDuration } = await import("./route");
 
 function post(body: unknown) {
   return new Request("http://localhost/api/generate", {
@@ -28,6 +32,11 @@ describe("POST /api/generate", () => {
     vi.unstubAllEnvs();
     vi.useRealTimers();
     getClaims.mockReset();
+    generateActivity.mockReset();
+  });
+
+  test("allows up to 60 seconds", () => {
+    expect(maxDuration).toBe(60);
   });
 
   test("401 when not logged in", async () => {
@@ -68,13 +77,30 @@ describe("POST /api/generate", () => {
     const res = await pending;
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ content: samples.true_false });
+    expect(generateActivity).not.toHaveBeenCalled();
   });
 
-  test("501 when fake mode is off", async () => {
+  test("real mode returns the generated activity", async () => {
     vi.stubEnv("FAKE_MODE", "false");
+    generateActivity.mockResolvedValue({ ok: true, activity: samples.true_false });
     const res = await POST(post(valid));
-    expect(res.status).toBe(501);
-    expect(await res.json()).toEqual({ error: "Real generation is not built yet." });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ content: samples.true_false });
+    expect(generateActivity).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "true_false", request: "Water cycle facts", history: [], current: null }),
+    );
+  });
+
+  test("real mode passes on the friendly error", async () => {
+    vi.stubEnv("FAKE_MODE", "false");
+    generateActivity.mockResolvedValue({
+      ok: false,
+      status: 429,
+      message: "The AI is busy, try again in a minute",
+    });
+    const res = await POST(post(valid));
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: "The AI is busy, try again in a minute" });
   });
 
   test("500 with a friendly message on unexpected errors", async () => {

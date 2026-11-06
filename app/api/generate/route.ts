@@ -1,3 +1,4 @@
+import { generateActivity } from "@/src/lib/ai/generate";
 import { samples } from "@/src/lib/samples";
 import {
   friendlyValidationMessage,
@@ -5,14 +6,17 @@ import {
 } from "@/src/lib/schemas/generate-request";
 import { createClient } from "@/src/lib/supabase/server";
 
+// Real generation can take a while; allow up to 60 seconds.
+export const maxDuration = 60;
+
 const FAKE_DELAY_MS = 700;
 
 function errorResponse(status: number, message: string) {
   return Response.json({ error: message }, { status });
 }
 
-// Creates (or will create) an activity from the teacher's request.
-// For now: FAKE_MODE=true returns a saved sample; otherwise 501.
+// Creates or edits an activity from the teacher's request.
+// FAKE_MODE=true returns a saved sample; otherwise Claude generates it.
 export async function POST(request: Request) {
   try {
     // 1. Teacher must be logged in. (proxy.ts only guards /dashboard, so check here.)
@@ -42,8 +46,12 @@ export async function POST(request: Request) {
       return Response.json({ content: samples[type] });
     }
 
-    // 4. Real generation comes later.
-    return errorResponse(501, "Real generation is not built yet.");
+    // 4. Real generation with Claude.
+    const result = await generateActivity(parsed.data);
+    if (!result.ok) {
+      return errorResponse(result.status, result.message);
+    }
+    return Response.json({ content: result.activity });
   } catch (error) {
     console.error("POST /api/generate failed:", error);
     return errorResponse(500, "Something went wrong. Please try again.");
