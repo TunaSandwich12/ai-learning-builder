@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
@@ -64,7 +65,15 @@ async function Dashboard() {
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
         <h1 className="mb-4 text-2xl font-bold tracking-tight">Your activities</h1>
 
-        <AddTestActivityButton />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/activities/new"
+            className="flex h-12 w-full items-center justify-center rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
+          >
+            New activity
+          </Link>
+          <AddTestActivityButton />
+        </div>
 
         <div className="mt-6">
           {error ? (
