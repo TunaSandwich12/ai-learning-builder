@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { MultipleChoicePreview } from "@/components/preview/multiple-choice";
+import { ActivityPreview } from "@/components/preview";
 import { activityTypeInfo, activityTypeOptions } from "@/src/lib/activity-types";
 import { FALLBACK_ERROR, readGenerateResponse } from "@/src/lib/generate-client";
 import { SAVE_MESSAGES } from "@/src/lib/save-activity";
@@ -198,13 +198,7 @@ export function ActivityForm({ initial }: Props) {
 
       {activity && type && (
         <div className="flex flex-col gap-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-          {activity.type === "multiple_choice" ? (
-            <MultipleChoicePreview activity={activity} />
-          ) : (
-            <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-8 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-              Preview coming on Day 4
-            </p>
-          )}
+          <ActivityPreview activity={activity} />
           <RefineChat
             key={chatKey}
             type={type}
