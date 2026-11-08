@@ -23,6 +23,14 @@ export const DELETE_MESSAGES = {
 
 export type DeleteResult = { ok: true } | { ok: false; message: string };
 
+export const SHARE_MESSAGES = {
+  signedOut: "You've been signed out. Sign in again, then try again.",
+  notFound: "Couldn't find this activity. It may have been deleted.",
+  failed: "Couldn't change sharing. Check your connection and try again.",
+} as const;
+
+export type ShareResult = { ok: true } | { ok: false; message: string };
+
 export type SaveResult = { ok: true; id: string } | { ok: false; message: string };
 
 export type ValidatedSave =

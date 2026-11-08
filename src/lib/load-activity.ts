@@ -14,3 +14,16 @@ export function parseSavedRow(row: SavedRow | null, userId: string): Activity | 
   const parsed = activitySchema.safeParse(row.content);
   return parsed.success ? parsed.data : null;
 }
+
+/** Shown on /a/<id> for every failure, so the page never says why. */
+export const UNAVAILABLE_MESSAGE = "This activity isn't available. Ask your teacher for a new link.";
+
+/**
+ * The public /a/<id> page selects only `content` (never owner_id or anything
+ * about the teacher). Returns the activity, or null if missing or invalid.
+ */
+export function parseSharedRow(row: { content: unknown } | null): Activity | null {
+  if (!row) return null;
+  const parsed = activitySchema.safeParse(row.content);
+  return parsed.success ? parsed.data : null;
+}

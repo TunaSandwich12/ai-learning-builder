@@ -13,6 +13,7 @@ type ActivityRow = {
   type: string;
   title: string;
   updated_at: string;
+  is_public: boolean;
 };
 
 const dateFormat = new Intl.DateTimeFormat("en-ZA", {
@@ -52,7 +53,7 @@ async function Dashboard() {
   // just makes that explicit.
   const { data, error } = await supabase
     .from("activities")
-    .select("id, type, title, updated_at")
+    .select("id, type, title, updated_at, is_public")
     .eq("owner_id", claims.sub)
     .order("updated_at", { ascending: false });
   const activities = (data ?? []) as ActivityRow[];
@@ -99,6 +100,11 @@ async function Dashboard() {
                       <span className="rounded bg-zinc-100 px-1.5 dark:bg-zinc-800">
                         {activityTypeLabel(activity.type)}
                       </span>
+                      {activity.is_public && (
+                        <span className="rounded bg-green-50 px-1.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                          Shared
+                        </span>
+                      )}
                       <time dateTime={activity.updated_at}>
                         {dateFormat.format(new Date(activity.updated_at))}
                       </time>

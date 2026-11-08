@@ -6,9 +6,11 @@ import { activityIdSchema } from "@/src/lib/load-activity";
 import {
   DELETE_MESSAGES,
   SAVE_MESSAGES,
+  SHARE_MESSAGES,
   validateSave,
   type DeleteResult,
   type SaveResult,
+  type ShareResult,
 } from "@/src/lib/save-activity";
 
 /**
@@ -91,5 +93,46 @@ export async function deleteActivity(id: unknown): Promise<DeleteResult> {
   } catch (error) {
     console.error("deleteActivity failed:", error);
     return { ok: false, message: DELETE_MESSAGES.failed };
+  }
+}
+
+/** Turns sharing on for one of the logged-in teacher's activities. Never throws. */
+export async function shareActivity(id: unknown): Promise<ShareResult> {
+  return setSharing(id, true);
+}
+
+/** Turns sharing off for one of the logged-in teacher's activities. Never throws. */
+export async function stopSharing(id: unknown): Promise<ShareResult> {
+  return setSharing(id, false);
+}
+
+// Not exported, so it isn't a server action of its own.
+async function setSharing(id: unknown, isPublic: boolean): Promise<ShareResult> {
+  try {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getClaims();
+    if (!auth?.claims) return { ok: false, message: SHARE_MESSAGES.signedOut };
+
+    const parsedId = activityIdSchema.safeParse(id);
+    if (!parsedId.success) return { ok: false, message: SHARE_MESSAGES.notFound };
+
+    // RLS only allows updating your own rows; the owner_id filter makes it explicit.
+    const { data, error } = await supabase
+      .from("activities")
+      .update({ is_public: isPublic })
+      .eq("id", parsedId.data)
+      .eq("owner_id", auth.claims.sub)
+      .select("id");
+    if (error) {
+      console.error("setSharing: update failed", error);
+      return { ok: false, message: SHARE_MESSAGES.failed };
+    }
+    if (!data || data.length === 0) return { ok: false, message: SHARE_MESSAGES.notFound };
+
+    revalidatePath("/dashboard");
+    return { ok: true };
+  } catch (error) {
+    console.error("setSharing failed:", error);
+    return { ok: false, message: SHARE_MESSAGES.failed };
   }
 }
