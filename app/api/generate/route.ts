@@ -38,12 +38,14 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return errorResponse(400, friendlyValidationMessage(parsed.error));
     }
-    const { type } = parsed.data;
+    const { type, current } = parsed.data;
 
     // 3. Fake mode: pretend to think, then return the sample for this type.
+    //    When refining, return the current activity with a marked title instead.
     if (process.env.FAKE_MODE === "true") {
       await new Promise((resolve) => setTimeout(resolve, FAKE_DELAY_MS));
-      return Response.json({ content: samples[type] });
+      const content = current ? { ...current, title: `${current.title} (changed)` } : samples[type];
+      return Response.json({ content });
     }
 
     // 4. Real generation with Claude.

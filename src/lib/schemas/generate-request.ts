@@ -6,6 +6,9 @@ import { activitySchema, activityTypeSchema } from "./index";
 
 export const MAX_REQUEST_LENGTH = 20_000;
 
+/** Only the last few chat messages are sent with a refine request. */
+export const MAX_HISTORY = 10;
+
 export const generateRequestSchema = z
   .object({
     type: activityTypeSchema.describe("Which kind of activity to make."),
@@ -20,9 +23,10 @@ export const generateRequestSchema = z
       .array(
         z.object({
           role: z.enum(["teacher", "assistant"]),
-          text: z.string(),
+          text: z.string().max(MAX_REQUEST_LENGTH),
         }),
       )
+      .max(MAX_HISTORY)
       .default([]),
     current: activitySchema.nullable().default(null),
   })

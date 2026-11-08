@@ -6,6 +6,7 @@ import { activityTypeInfo, activityTypeOptions } from "@/src/lib/activity-types"
 import { FALLBACK_ERROR, readGenerateResponse } from "@/src/lib/generate-client";
 import type { Activity, ActivityType } from "@/src/lib/schemas";
 import { MAX_REQUEST_LENGTH } from "@/src/lib/schemas/generate-request";
+import { RefineChat } from "./RefineChat";
 
 export function NewActivityForm() {
   const [type, setType] = useState<ActivityType | null>(null);
@@ -13,21 +14,27 @@ export function NewActivityForm() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activity, setActivity] = useState<Activity | null>(null);
+  const [refining, setRefining] = useState(false);
+  // A new key gives each new activity a fresh, empty chat.
+  const [chatKey, setChatKey] = useState(0);
+  const busy = creating || refining;
 
   function chooseType(next: ActivityType) {
-    if (creating) return;
+    if (busy) return;
     setType(next);
     setActivity(null);
+    setChatKey((k) => k + 1);
     setError(null);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!type || creating || !request.trim()) return;
+    if (!type || busy || !request.trim()) return;
 
     setCreating(true);
     setError(null);
     setActivity(null);
+    setChatKey((k) => k + 1);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -57,7 +64,7 @@ export function NewActivityForm() {
                 key={option.type}
                 type="button"
                 aria-pressed={selected}
-                disabled={creating}
+                disabled={busy}
                 onClick={() => chooseType(option.type)}
                 className={
                   "min-h-16 rounded-lg border-2 px-4 py-3 text-left disabled:opacity-60 " +
@@ -94,7 +101,7 @@ export function NewActivityForm() {
 
           <button
             type="submit"
-            disabled={creating || !request.trim()}
+            disabled={busy || !request.trim()}
             aria-busy={creating}
             className="h-12 w-full rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 disabled:opacity-60 sm:w-auto sm:self-start sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
           >
@@ -116,8 +123,8 @@ export function NewActivityForm() {
         </form>
       )}
 
-      {activity && (
-        <div className="border-t border-zinc-200 pt-6 dark:border-zinc-800">
+      {activity && type && (
+        <div className="flex flex-col gap-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
           {activity.type === "multiple_choice" ? (
             <MultipleChoicePreview activity={activity} />
           ) : (
@@ -125,6 +132,13 @@ export function NewActivityForm() {
               Preview coming on Day 4
             </p>
           )}
+          <RefineChat
+            key={chatKey}
+            type={type}
+            activity={activity}
+            onUpdated={setActivity}
+            onBusyChange={setRefining}
+          />
         </div>
       )}
     </div>

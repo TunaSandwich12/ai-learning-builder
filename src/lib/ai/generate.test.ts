@@ -65,6 +65,7 @@ describe("buildUserMessage", () => {
     expect(msg).toContain("Teacher: Make a quiz\nAssistant: Here is your quiz.");
     expect(msg).toContain("<current_activity>");
     expect(msg).toContain(samples.multiple_choice.title);
+    expect(msg).toContain("keep everything they didn't ask to change");
     // The request comes last.
     expect(msg.trim().endsWith("</teacher_request>")).toBe(true);
   });
