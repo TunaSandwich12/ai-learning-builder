@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { samples } from "@/src/lib/samples";
-import { SAVE_MESSAGES } from "@/src/lib/save-activity";
+import { DELETE_MESSAGES, SAVE_MESSAGES } from "@/src/lib/save-activity";
 
 // A fake Supabase client that records the calls the action makes.
 const getClaims = vi.fn();
@@ -10,13 +10,16 @@ const eq = vi.fn();
 const single = vi.fn();
 const maybeSingle = vi.fn();
 const from = vi.fn();
+const del = vi.fn();
+const delEq = vi.fn();
+const delSelect = vi.fn();
 
 vi.mock("@/src/lib/supabase/server", () => ({
   createClient: async () => ({ auth: { getClaims }, from }),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-const { saveActivity } = await import("./actions");
+const { deleteActivity, saveActivity } = await import("./actions");
 
 const ID = "3f2b8c1e-5d4a-4b6e-9c7f-1a2b3c4d5e6f";
 const NEW_ID = "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d";
@@ -32,7 +35,7 @@ describe("saveActivity", () => {
     // update(row).eq("id", id).select("id").maybeSingle()
     update.mockReturnValue({ eq });
     eq.mockReturnValue({ select: () => ({ maybeSingle }) });
-    from.mockReturnValue({ insert, update });
+    from.mockReturnValue({ insert, update, delete: del });
 
     single.mockResolvedValue({ data: { id: NEW_ID }, error: null });
     maybeSingle.mockResolvedValue({ data: { id: ID }, error: null });
@@ -101,5 +104,53 @@ describe("saveActivity", () => {
       ok: false,
       message: SAVE_MESSAGES.failed,
     });
+  });
+});
+
+describe("deleteActivity", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    getClaims.mockResolvedValue({ data: { claims: { sub: "teacher-1" } } });
+
+    // delete().eq("id", id).eq("owner_id", sub).select("id")
+    const chain = { eq: delEq, select: delSelect };
+    del.mockReturnValue(chain);
+    delEq.mockReturnValue(chain);
+    delSelect.mockResolvedValue({ data: [{ id: ID }], error: null });
+    from.mockReturnValue({ delete: del });
+  });
+
+  test("signed out: returns a message and touches no data", async () => {
+    getClaims.mockResolvedValue({ data: null });
+    expect(await deleteActivity(ID)).toEqual({ ok: false, message: DELETE_MESSAGES.signedOut });
+    expect(from).not.toHaveBeenCalled();
+  });
+
+  test.each([["abc"], [""], [null], [123]])("bad id %j touches no data", async (id) => {
+    expect(await deleteActivity(id)).toEqual({ ok: false, message: DELETE_MESSAGES.notFound });
+    expect(from).not.toHaveBeenCalled();
+  });
+
+  test("deletes the row filtered by id and the teacher's owner_id", async () => {
+    expect(await deleteActivity(ID)).toEqual({ ok: true });
+    expect(from).toHaveBeenCalledWith("activities");
+    expect(delEq).toHaveBeenCalledWith("id", ID);
+    expect(delEq).toHaveBeenCalledWith("owner_id", "teacher-1");
+  });
+
+  test("nothing deleted (missing, or another teacher's) gives the not-found message", async () => {
+    delSelect.mockResolvedValue({ data: [], error: null });
+    expect(await deleteActivity(ID)).toEqual({ ok: false, message: DELETE_MESSAGES.notFound });
+  });
+
+  test("database errors give the friendly failure message", async () => {
+    delSelect.mockResolvedValue({ data: null, error: { message: "boom" } });
+    expect(await deleteActivity(ID)).toEqual({ ok: false, message: DELETE_MESSAGES.failed });
+  });
+
+  test("never throws", async () => {
+    getClaims.mockRejectedValue(new Error("network down"));
+    expect(await deleteActivity(ID)).toEqual({ ok: false, message: DELETE_MESSAGES.failed });
   });
 });

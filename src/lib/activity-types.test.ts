@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { activityTypeOptions } from "./activity-types";
+import { activityTypeLabel, activityTypeOptions } from "./activity-types";
 import { activityTypes } from "./schemas";
 
 describe("activityTypeOptions", () => {
@@ -13,5 +13,20 @@ describe("activityTypeOptions", () => {
       expect(option.description.trim()).not.toBe("");
       expect(option.placeholder.trim()).not.toBe("");
     }
+  });
+});
+
+describe("activityTypeLabel", () => {
+  test("gives each type in words", () => {
+    expect(activityTypeLabel("multiple_choice")).toBe("Multiple choice");
+    expect(activityTypeLabel("true_false")).toBe("True or false");
+    expect(activityTypeLabel("flashcards")).toBe("Flashcards");
+    expect(activityTypeLabel("matching")).toBe("Matching");
+    expect(activityTypeLabel("ordering")).toBe("Ordering");
+  });
+
+  test("falls back to the stored value for an unknown type", () => {
+    expect(activityTypeLabel("essay")).toBe("essay");
+    expect(activityTypeLabel("toString")).toBe("toString");
   });
 });

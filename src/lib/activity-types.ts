@@ -41,3 +41,10 @@ export const activityTypeOptions = activityTypes.map((type) => ({
   type,
   ...activityTypeInfo[type],
 }));
+
+/** The type in words ("Multiple choice") for a type stored in the database. */
+export function activityTypeLabel(type: string): string {
+  return Object.hasOwn(activityTypeInfo, type)
+    ? activityTypeInfo[type as ActivityType].label
+    : type;
+}

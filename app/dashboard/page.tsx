@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import { LogoutButton } from "./buttons";
+import { activityTypeLabel } from "@/src/lib/activity-types";
+import { DeleteActivityButton, LogoutButton } from "./buttons";
 
 export const metadata: Metadata = { title: "Dashboard · AI Learning Builder" };
 
@@ -11,10 +12,13 @@ type ActivityRow = {
   id: string;
   type: string;
   title: string;
-  created_at: string;
+  updated_at: string;
 };
 
-const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
+const dateFormat = new Intl.DateTimeFormat("en-ZA", {
+  dateStyle: "medium",
+  timeZone: "Africa/Johannesburg",
+});
 
 // The page reads login cookies, so it can't be built ahead of time. Wrapping it
 // in <Suspense> lets Next.js prerender the loading shell and stream the rest.
@@ -48,9 +52,9 @@ async function Dashboard() {
   // just makes that explicit.
   const { data, error } = await supabase
     .from("activities")
-    .select("id, type, title, created_at")
+    .select("id, type, title, updated_at")
     .eq("owner_id", claims.sub)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
   const activities = (data ?? []) as ActivityRow[];
 
   return (
@@ -66,12 +70,7 @@ async function Dashboard() {
         <h1 className="mb-4 text-2xl font-bold tracking-tight">Your activities</h1>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="/activities/new"
-            className="flex h-12 w-full items-center justify-center rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
-          >
-            New activity
-          </Link>
+          <NewActivityLink />
         </div>
 
         <div className="mt-6">
@@ -80,23 +79,32 @@ async function Dashboard() {
               Couldn&apos;t load your activities. Refresh the page to try again.
             </p>
           ) : activities.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-8 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-              No activities yet.
-            </p>
+            <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-zinc-300 px-4 py-8 text-center dark:border-zinc-700">
+              <p className="text-zinc-600 dark:text-zinc-400">No activities yet. Create your first one.</p>
+              <NewActivityLink />
+            </div>
           ) : (
             <ul className="flex flex-col gap-3">
               {activities.map((activity) => (
                 <li
                   key={activity.id}
-                  className="rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-800"
+                  className="flex flex-wrap items-stretch gap-2 rounded-lg border border-zinc-200 p-2 dark:border-zinc-800"
                 >
-                  <p className="font-medium break-words">{activity.title}</p>
-                  <p className="mt-1 flex flex-wrap gap-x-2 text-sm text-zinc-500 dark:text-zinc-400">
-                    <span className="rounded bg-zinc-100 px-1.5 dark:bg-zinc-800">{activity.type}</span>
-                    <time dateTime={activity.created_at}>
-                      {dateFormat.format(new Date(activity.created_at))}
-                    </time>
-                  </p>
+                  <Link
+                    href={`/activities/${activity.id}`}
+                    className="min-w-0 flex-1 rounded-md px-2 py-2 active:bg-zinc-100 dark:active:bg-zinc-800"
+                  >
+                    <p className="font-medium break-words">{activity.title}</p>
+                    <p className="mt-1 flex flex-wrap gap-x-2 text-sm text-zinc-500 dark:text-zinc-400">
+                      <span className="rounded bg-zinc-100 px-1.5 dark:bg-zinc-800">
+                        {activityTypeLabel(activity.type)}
+                      </span>
+                      <time dateTime={activity.updated_at}>
+                        {dateFormat.format(new Date(activity.updated_at))}
+                      </time>
+                    </p>
+                  </Link>
+                  <DeleteActivityButton id={activity.id} title={activity.title} />
                 </li>
               ))}
             </ul>
@@ -104,5 +112,16 @@ async function Dashboard() {
         </div>
       </main>
     </div>
+  );
+}
+
+function NewActivityLink() {
+  return (
+    <Link
+      href="/activities/new"
+      className="flex h-12 w-full items-center justify-center rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
+    >
+      New activity
+    </Link>
   );
 }

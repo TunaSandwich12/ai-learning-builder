@@ -15,6 +15,14 @@ export const SAVE_MESSAGES = {
 /** The only columns the browser's data can reach. owner_id is never included. */
 export type ActivityRow = { type: ActivityType; title: string; content: Activity };
 
+export const DELETE_MESSAGES = {
+  signedOut: "You've been signed out. Sign in again, then try again.",
+  notFound: "Couldn't find this activity. It may already be deleted.",
+  failed: "Couldn't delete. Check your connection and try again.",
+} as const;
+
+export type DeleteResult = { ok: true } | { ok: false; message: string };
+
 export type SaveResult = { ok: true; id: string } | { ok: false; message: string };
 
 export type ValidatedSave =
