@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { schemas, type Activity } from "@/src/lib/schemas";
 import type { GenerateRequest } from "@/src/lib/schemas/generate-request";
+import { checkActivity } from "@/src/lib/checks";
 
 const MODEL = "claude-sonnet-5-5";
 
@@ -55,51 +56,6 @@ export function buildUserMessage(input: GenerateRequest): string {
   return parts.join("\n\n");
 }
 
-/**
- * Rules the schemas can only describe (structured outputs don't enforce counts).
- * Returns a list of problems; empty means the activity is usable.
- */
-export function findProblems(activity: Activity): string[] {
-  const problems: string[] = [];
-  const blank = (s: string) => s.trim().length === 0;
-
-  if (blank(activity.title)) problems.push("title is empty");
-  if (blank(activity.instructions)) problems.push("instructions are empty");
-
-  switch (activity.type) {
-    case "multiple_choice":
-      if (activity.questions.length === 0) problems.push("no questions");
-      activity.questions.forEach((q, i) => {
-        if (blank(q.question)) problems.push(`question ${i + 1} is empty`);
-        if (q.options.length !== 4) {
-          problems.push(`question ${i + 1} has ${q.options.length} options, not 4`);
-        }
-        const correct = q.options.filter((o) => o.isCorrect).length;
-        if (correct !== 1) problems.push(`question ${i + 1} has ${correct} correct options, not 1`);
-        if (q.options.some((o) => blank(o.text))) problems.push(`question ${i + 1} has an empty option`);
-      });
-      break;
-    case "true_false":
-      if (activity.statements.length === 0) problems.push("no statements");
-      if (activity.statements.some((s) => blank(s.statement))) problems.push("a statement is empty");
-      break;
-    case "flashcards":
-      if (activity.cards.length === 0) problems.push("no cards");
-      if (activity.cards.some((c) => blank(c.front) || blank(c.back))) problems.push("a card is empty");
-      break;
-    case "matching":
-      if (activity.pairs.length === 0) problems.push("no pairs");
-      if (activity.pairs.some((p) => blank(p.left) || blank(p.right))) problems.push("a pair is empty");
-      break;
-    case "ordering":
-      if (activity.items.length === 0) problems.push("no items");
-      if (activity.items.some(blank)) problems.push("an item is empty");
-      break;
-  }
-
-  return problems;
-}
-
 /** Calls Claude to create or edit an activity. Never throws. */
 export async function generateActivity(input: GenerateRequest): Promise<GenerateResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -129,7 +85,7 @@ export async function generateActivity(input: GenerateRequest): Promise<Generate
       return { ok: false, status: 500, message: MESSAGES.generic };
     }
 
-    const problems = findProblems(activity);
+    const problems = checkActivity(activity);
     if (activity.type !== input.type || problems.length > 0) {
       console.error("generateActivity: activity failed checks", {
         id: response.id,

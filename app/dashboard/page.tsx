@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import { AddTestActivityButton, LogoutButton } from "./buttons";
+import { LogoutButton } from "./buttons";
 
 export const metadata: Metadata = { title: "Dashboard · AI Learning Builder" };
 
@@ -72,7 +72,6 @@ async function Dashboard() {
           >
             New activity
           </Link>
-          <AddTestActivityButton />
         </div>
 
         <div className="mt-6">
