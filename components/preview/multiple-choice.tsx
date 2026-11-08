@@ -1,18 +1,12 @@
 import type { MultipleChoiceActivity } from "@/src/lib/schemas";
+import { PreviewHeader } from "./header";
 
 // Read-only preview for the teacher. Every piece of AI text is placed as a
 // plain {value} child, so React escapes it. Never use dangerouslySetInnerHTML here.
 export function MultipleChoicePreview({ activity }: { activity: MultipleChoiceActivity }) {
   return (
     <section aria-labelledby="preview-title" className="flex flex-col gap-4">
-      <div>
-        <h2 id="preview-title" className="text-xl font-bold break-words">
-          {activity.title}
-        </h2>
-        <p className="mt-1 text-zinc-600 break-words dark:text-zinc-400">
-          {activity.instructions}
-        </p>
-      </div>
+      <PreviewHeader title={activity.title} instructions={activity.instructions} />
 
       <ol className="flex flex-col gap-4">
         {activity.questions.map((q, qi) => (
