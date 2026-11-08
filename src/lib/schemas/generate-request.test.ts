@@ -61,6 +61,11 @@ describe("generateRequestSchema", () => {
     expect(messageFor({ ...valid, type: "essay" })).toBe("Please choose an activity type.");
   });
 
+  test("rejects more than 10 history messages", () => {
+    const history = Array.from({ length: 11 }, (_, i) => ({ role: "teacher", text: `msg ${i}` }));
+    expect(messageFor({ ...valid, history })).toMatch(/refresh the page/);
+  });
+
   test("rejects a bad history role with a generic message", () => {
     expect(messageFor({ ...valid, history: [{ role: "student", text: "hi" }] })).toMatch(
       /Something is wrong/,

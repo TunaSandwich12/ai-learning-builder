@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { FALLBACK_ERROR, readGenerateResponse } from "./generate-client";
+import {
+  buildRefineBody,
+  FALLBACK_ERROR,
+  readGenerateResponse,
+  type ChatMessage,
+} from "./generate-client";
 import { samples } from "./samples";
 
 function jsonResponse(body: unknown, status = 200) {
@@ -57,5 +62,31 @@ describe("readGenerateResponse", () => {
     expect(
       await readGenerateResponse(jsonResponse({ content: { type: "multiple_choice", title: "Hi" } })),
     ).toEqual({ ok: false, message: FALLBACK_ERROR });
+  });
+});
+
+describe("buildRefineBody", () => {
+  test("sends only the last 10 messages, plus the request and current activity", () => {
+    const messages: ChatMessage[] = Array.from({ length: 14 }, (_, i) => ({
+      role: i % 2 === 0 ? "teacher" : "assistant",
+      text: `msg ${i}`,
+    }));
+    const body = buildRefineBody("multiple_choice", "Make question 3 harder", messages, samples.multiple_choice);
+    expect(body.type).toBe("multiple_choice");
+    expect(body.request).toBe("Make question 3 harder");
+    expect(body.current).toBe(samples.multiple_choice);
+    expect(body.history).toHaveLength(10);
+    expect(body.history[0].text).toBe("msg 4");
+    expect(body.history[9].text).toBe("msg 13");
+  });
+
+  test("strips extra fields like ids from messages", () => {
+    const body = buildRefineBody(
+      "flashcards",
+      "Add a card",
+      [{ id: 1, role: "teacher", text: "hi" } as ChatMessage],
+      samples.flashcards,
+    );
+    expect(body.history).toEqual([{ role: "teacher", text: "hi" }]);
   });
 });

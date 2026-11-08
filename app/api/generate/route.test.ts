@@ -80,6 +80,27 @@ describe("POST /api/generate", () => {
     expect(generateActivity).not.toHaveBeenCalled();
   });
 
+  test("fake mode refine returns the current activity with a changed title", async () => {
+    vi.useFakeTimers();
+    const originalTitle = samples.true_false.title;
+    const pending = POST(
+      post({
+        ...valid,
+        request: "Make statement 2 harder",
+        history: [{ role: "teacher", text: "Water cycle facts" }],
+        current: samples.true_false,
+      }),
+    );
+    await vi.advanceTimersByTimeAsync(700);
+    const res = await pending;
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      content: { ...samples.true_false, title: `${originalTitle} (changed)` },
+    });
+    expect(samples.true_false.title).toBe(originalTitle);
+    expect(generateActivity).not.toHaveBeenCalled();
+  });
+
   test("real mode returns the generated activity", async () => {
     vi.stubEnv("FAKE_MODE", "false");
     generateActivity.mockResolvedValue({ ok: true, activity: samples.true_false });

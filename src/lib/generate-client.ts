@@ -1,4 +1,22 @@
-import { activitySchema, type Activity } from "./schemas";
+import { activitySchema, type Activity, type ActivityType } from "./schemas";
+import { MAX_HISTORY } from "./schemas/generate-request";
+
+export type ChatMessage = { role: "teacher" | "assistant"; text: string };
+
+/** Body for a refine request: the new message, the last few chat messages, and the current activity. */
+export function buildRefineBody(
+  type: ActivityType,
+  request: string,
+  messages: ChatMessage[],
+  current: Activity,
+) {
+  return {
+    type,
+    request,
+    history: messages.slice(-MAX_HISTORY).map(({ role, text }) => ({ role, text })),
+    current,
+  };
+}
 
 export type GenerateResult =
   | { ok: true; activity: Activity }
