@@ -1,7 +1,11 @@
 "use client";
 
 import type { Activity } from "@/src/lib/schemas";
+import { FlashcardsPlayer } from "./flashcards";
+import { MatchingPlayer } from "./matching";
 import { MultipleChoicePlayer } from "./multiple-choice";
+import { OrderingPlayer } from "./ordering";
+import { TrueFalsePlayer } from "./true-false";
 
 /** The student view of an activity: title, instructions and the right player for its type. */
 export function ActivityPlayer({ activity }: { activity: Activity }) {
@@ -21,14 +25,13 @@ function Player({ activity }: { activity: Activity }) {
     case "multiple_choice":
       return <MultipleChoicePlayer activity={activity} />;
     case "true_false":
+      return <TrueFalsePlayer activity={activity} />;
     case "flashcards":
+      return <FlashcardsPlayer activity={activity} />;
     case "matching":
+      return <MatchingPlayer activity={activity} />;
     case "ordering":
-      return (
-        <p className="rounded-xl border border-dashed border-zinc-300 px-4 py-8 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-          This activity type is coming soon.
-        </p>
-      );
+      return <OrderingPlayer activity={activity} />;
     default: {
       // A new activity type without a player fails the typecheck here.
       const unhandled: never = activity;
