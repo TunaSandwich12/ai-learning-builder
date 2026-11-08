@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import { NewActivityForm } from "./NewActivityForm";
+import { ActivityForm } from "../ActivityForm";
 
 export const metadata: Metadata = { title: "New activity · AI Learning Builder" };
 
@@ -39,5 +39,5 @@ async function SignedInForm() {
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/login");
 
-  return <NewActivityForm />;
+  return <ActivityForm />;
 }

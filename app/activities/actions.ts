@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/src/lib/supabase/server";
-import { SAVE_MESSAGES, validateSave, type SaveResult } from "@/src/lib/save-activity";
+import { activityIdSchema } from "@/src/lib/load-activity";
+import {
+  DELETE_MESSAGES,
+  SAVE_MESSAGES,
+  validateSave,
+  type DeleteResult,
+  type SaveResult,
+} from "@/src/lib/save-activity";
 
 /**
  * Creates (id = null) or updates an activity for the logged-in teacher.
@@ -53,5 +60,36 @@ export async function saveActivity(id: string | null, activity: unknown): Promis
   } catch (error) {
     console.error("saveActivity failed:", error);
     return { ok: false, message: SAVE_MESSAGES.failed };
+  }
+}
+
+/** Deletes one of the logged-in teacher's activities. Never throws. */
+export async function deleteActivity(id: unknown): Promise<DeleteResult> {
+  try {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getClaims();
+    if (!auth?.claims) return { ok: false, message: DELETE_MESSAGES.signedOut };
+
+    const parsedId = activityIdSchema.safeParse(id);
+    if (!parsedId.success) return { ok: false, message: DELETE_MESSAGES.notFound };
+
+    // RLS only allows deleting your own rows; the owner_id filter makes it explicit.
+    const { data, error } = await supabase
+      .from("activities")
+      .delete()
+      .eq("id", parsedId.data)
+      .eq("owner_id", auth.claims.sub)
+      .select("id");
+    if (error) {
+      console.error("deleteActivity: delete failed", error);
+      return { ok: false, message: DELETE_MESSAGES.failed };
+    }
+    if (!data || data.length === 0) return { ok: false, message: DELETE_MESSAGES.notFound };
+
+    revalidatePath("/dashboard");
+    return { ok: true };
+  } catch (error) {
+    console.error("deleteActivity failed:", error);
+    return { ok: false, message: DELETE_MESSAGES.failed };
   }
 }

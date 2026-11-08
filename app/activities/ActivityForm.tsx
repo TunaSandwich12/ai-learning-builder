@@ -7,7 +7,7 @@ import { FALLBACK_ERROR, readGenerateResponse } from "@/src/lib/generate-client"
 import { SAVE_MESSAGES } from "@/src/lib/save-activity";
 import type { Activity, ActivityType } from "@/src/lib/schemas";
 import { MAX_REQUEST_LENGTH } from "@/src/lib/schemas/generate-request";
-import { saveActivity } from "../actions";
+import { saveActivity } from "./actions";
 import { RefineChat } from "./RefineChat";
 
 type SaveState = "idle" | "saving" | "saved" | "unsaved";
@@ -19,18 +19,24 @@ const SAVE_STATUS_TEXT: Record<SaveState, string> = {
   unsaved: "Unsaved changes",
 };
 
-export function NewActivityForm() {
-  const [type, setType] = useState<ActivityType | null>(null);
+type Props = {
+  /** A saved activity to start from (the /activities/<id> page). */
+  initial?: { id: string; activity: Activity };
+};
+
+/** Create, refine and save an activity. Used by /activities/new and /activities/<id>. */
+export function ActivityForm({ initial }: Props) {
+  const [type, setType] = useState<ActivityType | null>(initial?.activity.type ?? null);
   const [request, setRequest] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activity, setActivity] = useState<Activity | null>(null);
+  const [activity, setActivity] = useState<Activity | null>(initial?.activity ?? null);
   const [refining, setRefining] = useState(false);
   // A new key gives each new activity a fresh, empty chat.
   const [chatKey, setChatKey] = useState(0);
   // Saving: null id means "not saved yet" (the next save inserts a new row).
-  const [savedId, setSavedId] = useState<string | null>(null);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [savedId, setSavedId] = useState<string | null>(initial?.id ?? null);
+  const [saveState, setSaveState] = useState<SaveState>(initial ? "saved" : "idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   // Goes up on every change to the activity, so a save that finishes after a
   // refine doesn't wrongly report "Saved".
