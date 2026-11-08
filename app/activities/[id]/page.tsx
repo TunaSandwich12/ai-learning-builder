@@ -45,13 +45,14 @@ async function EditActivity({ params }: { params: Promise<{ id: string }> }) {
 
   const { data, error } = await supabase
     .from("activities")
-    .select("id, owner_id, content")
+    .select("id, owner_id, content, is_public")
     .eq("id", id)
     .maybeSingle();
   if (error) console.error("EditActivity: load failed", error);
 
-  const activity = parseSavedRow(data as SavedRow | null, auth.claims.sub);
-  if (!activity) notFound();
+  const row = data as (SavedRow & { is_public: boolean }) | null;
+  const activity = parseSavedRow(row, auth.claims.sub);
+  if (!row || !activity) notFound();
 
-  return <ActivityForm initial={{ id, activity }} />;
+  return <ActivityForm initial={{ id, activity, isPublic: row.is_public === true }} />;
 }

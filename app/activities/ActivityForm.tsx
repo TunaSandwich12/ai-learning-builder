@@ -9,6 +9,7 @@ import type { Activity, ActivityType } from "@/src/lib/schemas";
 import { MAX_REQUEST_LENGTH } from "@/src/lib/schemas/generate-request";
 import { saveActivity } from "./actions";
 import { RefineChat } from "./RefineChat";
+import { SharePanel } from "./SharePanel";
 
 type SaveState = "idle" | "saving" | "saved" | "unsaved";
 
@@ -21,7 +22,7 @@ const SAVE_STATUS_TEXT: Record<SaveState, string> = {
 
 type Props = {
   /** A saved activity to start from (the /activities/<id> page). */
-  initial?: { id: string; activity: Activity };
+  initial?: { id: string; activity: Activity; isPublic: boolean };
 };
 
 /** Create, refine and save an activity. Used by /activities/new and /activities/<id>. */
@@ -38,11 +39,13 @@ export function ActivityForm({ initial }: Props) {
   const [savedId, setSavedId] = useState<string | null>(initial?.id ?? null);
   const [saveState, setSaveState] = useState<SaveState>(initial ? "saved" : "idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(initial?.isPublic ?? false);
+  const [sharing, setSharing] = useState(false);
   // Goes up on every change to the activity, so a save that finishes after a
   // refine doesn't wrongly report "Saved".
   const version = useRef(0);
   const saving = saveState === "saving";
-  const busy = creating || refining || saving;
+  const busy = creating || refining || saving || sharing;
 
   /** Forget the saved row: the next activity is a new one. */
   function resetSave() {
@@ -50,6 +53,7 @@ export function ActivityForm({ initial }: Props) {
     setSavedId(null);
     setSaveState("idle");
     setSaveError(null);
+    setIsPublic(false);
     if (window.location.pathname !== "/activities/new") {
       window.history.replaceState(null, "", "/activities/new");
     }
@@ -238,6 +242,15 @@ export function ActivityForm({ initial }: Props) {
               {saveError}
             </p>
           )}
+
+          <SharePanel
+            id={savedId}
+            canShare={savedId !== null && saveState === "saved"}
+            disabled={creating || refining || saving}
+            isPublic={isPublic}
+            onChange={setIsPublic}
+            onBusyChange={setSharing}
+          />
         </div>
       )}
     </div>
