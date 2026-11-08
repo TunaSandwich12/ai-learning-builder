@@ -1,12 +1,23 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { MultipleChoicePreview } from "@/components/preview/multiple-choice";
 import { activityTypeInfo, activityTypeOptions } from "@/src/lib/activity-types";
 import { FALLBACK_ERROR, readGenerateResponse } from "@/src/lib/generate-client";
+import { SAVE_MESSAGES } from "@/src/lib/save-activity";
 import type { Activity, ActivityType } from "@/src/lib/schemas";
 import { MAX_REQUEST_LENGTH } from "@/src/lib/schemas/generate-request";
+import { saveActivity } from "../actions";
 import { RefineChat } from "./RefineChat";
+
+type SaveState = "idle" | "saving" | "saved" | "unsaved";
+
+const SAVE_STATUS_TEXT: Record<SaveState, string> = {
+  idle: "",
+  saving: "Saving…",
+  saved: "Saved",
+  unsaved: "Unsaved changes",
+};
 
 export function NewActivityForm() {
   const [type, setType] = useState<ActivityType | null>(null);
@@ -17,7 +28,26 @@ export function NewActivityForm() {
   const [refining, setRefining] = useState(false);
   // A new key gives each new activity a fresh, empty chat.
   const [chatKey, setChatKey] = useState(0);
-  const busy = creating || refining;
+  // Saving: null id means "not saved yet" (the next save inserts a new row).
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  // Goes up on every change to the activity, so a save that finishes after a
+  // refine doesn't wrongly report "Saved".
+  const version = useRef(0);
+  const saving = saveState === "saving";
+  const busy = creating || refining || saving;
+
+  /** Forget the saved row: the next activity is a new one. */
+  function resetSave() {
+    version.current++;
+    setSavedId(null);
+    setSaveState("idle");
+    setSaveError(null);
+    if (window.location.pathname !== "/activities/new") {
+      window.history.replaceState(null, "", "/activities/new");
+    }
+  }
 
   function chooseType(next: ActivityType) {
     if (busy) return;
@@ -25,6 +55,42 @@ export function NewActivityForm() {
     setActivity(null);
     setChatKey((k) => k + 1);
     setError(null);
+    resetSave();
+  }
+
+  function handleRefined(next: Activity) {
+    version.current++;
+    setActivity(next);
+    // Functional update: this runs after an await in RefineChat, so a closed-over
+    // savedId could be stale. "idle" means never saved, so nothing is "unsaved".
+    setSaveState((s) => (s === "idle" ? "idle" : "unsaved"));
+  }
+
+  async function handleSave() {
+    if (!activity || busy) return;
+    const sentVersion = version.current;
+    setSaveState("saving");
+    setSaveError(null);
+
+    let result: Awaited<ReturnType<typeof saveActivity>>;
+    try {
+      result = await saveActivity(savedId, activity);
+    } catch {
+      // Network failure (offline, server unreachable).
+      result = { ok: false, message: SAVE_MESSAGES.failed };
+    }
+
+    if (!result.ok) {
+      setSaveError(result.message);
+      setSaveState(savedId ? "unsaved" : "idle");
+      return;
+    }
+    if (!savedId) {
+      // Update the address bar without reloading or losing what's on screen.
+      window.history.replaceState(null, "", `/activities/${result.id}`);
+    }
+    setSavedId(result.id);
+    setSaveState(version.current === sentVersion ? "saved" : "unsaved");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -35,6 +101,7 @@ export function NewActivityForm() {
     setError(null);
     setActivity(null);
     setChatKey((k) => k + 1);
+    resetSave();
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -136,9 +203,41 @@ export function NewActivityForm() {
             key={chatKey}
             type={type}
             activity={activity}
-            onUpdated={setActivity}
+            onUpdated={handleRefined}
             onBusyChange={setRefining}
           />
+
+          <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:gap-4 dark:border-zinc-800">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={busy || saveState === "saved"}
+              aria-busy={saving}
+              className="h-12 w-full rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 disabled:opacity-60 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+            <p
+              aria-live="polite"
+              className={
+                "text-sm " +
+                (saveState === "unsaved"
+                  ? "text-amber-700 dark:text-amber-300"
+                  : "text-zinc-600 dark:text-zinc-400")
+              }
+            >
+              {SAVE_STATUS_TEXT[saveState]}
+            </p>
+          </div>
+
+          {saveError && (
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 break-words dark:bg-red-950 dark:text-red-300"
+            >
+              {saveError}
+            </p>
+          )}
         </div>
       )}
     </div>

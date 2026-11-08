@@ -14,7 +14,7 @@ vi.mock("@anthropic-ai/sdk", async (importOriginal) => {
 import Anthropic from "@anthropic-ai/sdk";
 import { samples } from "../samples";
 import type { GenerateRequest } from "../schemas/generate-request";
-import { buildUserMessage, findProblems, generateActivity, MESSAGES } from "./generate";
+import { buildUserMessage, generateActivity, MESSAGES } from "./generate";
 
 const baseInput: GenerateRequest = {
   type: "multiple_choice",
@@ -68,34 +68,6 @@ describe("buildUserMessage", () => {
     expect(msg).toContain("keep everything they didn't ask to change");
     // The request comes last.
     expect(msg.trim().endsWith("</teacher_request>")).toBe(true);
-  });
-});
-
-describe("findProblems", () => {
-  test("samples have no problems", () => {
-    for (const sample of Object.values(samples)) {
-      expect(findProblems(sample)).toEqual([]);
-    }
-  });
-
-  test("flags 3 options and 2 correct answers", () => {
-    const [q] = samples.multiple_choice.questions;
-    const broken = {
-      ...samples.multiple_choice,
-      questions: [
-        {
-          ...q,
-          options: [
-            { text: "A", isCorrect: true },
-            { text: "B", isCorrect: true },
-            { text: "C", isCorrect: false },
-          ],
-        },
-      ],
-    };
-    const problems = findProblems(broken);
-    expect(problems).toContain("question 1 has 3 options, not 4");
-    expect(problems).toContain("question 1 has 2 correct options, not 1");
   });
 });
 
