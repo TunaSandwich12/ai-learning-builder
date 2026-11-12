@@ -66,10 +66,10 @@ export function RefineChat({ type, activity, onUpdated, onBusyChange }: Props) {
   }
 
   return (
-    <section aria-labelledby="refine-heading" className="flex flex-col gap-3">
-      <h2 id="refine-heading" className="text-base font-semibold">
-        Make changes
-      </h2>
+    <section aria-labelledby="refine-heading" className="flex flex-col gap-3 rounded-2xl bg-surface-2 p-4 sm:p-5">
+      <h3 id="refine-heading" className="text-base">
+        Ask for changes
+      </h3>
 
       {messages.length > 0 && (
         <ul className="flex flex-col gap-2">
@@ -77,10 +77,10 @@ export function RefineChat({ type, activity, onUpdated, onBusyChange }: Props) {
             <li
               key={m.id}
               className={
-                "max-w-[85%] rounded-lg px-3 py-2 text-sm break-words whitespace-pre-wrap " +
+                "max-w-[85%] rounded-2xl px-4 py-2 text-sm break-words whitespace-pre-wrap " +
                 (m.role === "teacher"
-                  ? "self-end bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "self-start bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100")
+                  ? "self-end bg-primary text-on-primary"
+                  : "self-start border border-rule bg-surface text-ink")
               }
             >
               <span className="sr-only">{m.role === "teacher" ? "You: " : "Assistant: "}</span>
@@ -101,13 +101,13 @@ export function RefineChat({ type, activity, onUpdated, onBusyChange }: Props) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Ask for a change, like: make question 3 harder"
-          className="h-12 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-300 dark:focus:ring-zinc-300/20"
+          className="field min-w-0 flex-1"
         />
         <button
           type="submit"
           disabled={sending || !draft.trim()}
           aria-busy={sending}
-          className="h-12 rounded-lg bg-zinc-900 px-6 text-base font-semibold text-white active:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
+          className="btn btn-primary"
         >
           {sending ? "Updating…" : "Send"}
         </button>
@@ -120,7 +120,7 @@ export function RefineChat({ type, activity, onUpdated, onBusyChange }: Props) {
       {error && (
         <p
           role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 break-words dark:bg-red-950 dark:text-red-300"
+          className="alert alert-bad"
         >
           {error}
         </p>

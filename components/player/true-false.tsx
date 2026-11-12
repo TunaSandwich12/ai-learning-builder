@@ -51,14 +51,14 @@ export function TrueFalsePlayer({ activity }: { activity: TrueFalseActivity }) {
   const last = state.index === total - 1;
 
   return (
-    <section aria-labelledby="statement" className="flex flex-col gap-5">
+    <section aria-labelledby="statement" className="flex flex-col gap-6">
       <Progress label="Statement" index={state.index} total={total} done={answered} />
 
       <h2
         id="statement"
         ref={statementRef}
         tabIndex={-1}
-        className="text-xl font-semibold break-words outline-none"
+        className="text-xl break-words outline-none sm:text-2xl"
       >
         {statement.statement}
       </h2>
@@ -75,19 +75,19 @@ export function TrueFalsePlayer({ activity }: { activity: TrueFalseActivity }) {
               disabled={answered}
               aria-pressed={isPicked}
               className={
-                "flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl border-2 px-3 py-3 text-xl font-bold " +
+                "choice min-h-16 flex-col justify-center gap-0.5 text-center text-lg font-semibold " +
                 (answered && isAnswer
-                  ? "border-green-600 bg-green-50 text-green-900 dark:border-green-500 dark:bg-green-950 dark:text-green-200"
+                  ? "is-right"
                   : answered && isPicked
-                    ? "border-red-600 bg-red-50 text-red-900 dark:border-red-500 dark:bg-red-950 dark:text-red-200"
+                    ? "is-wrong"
                     : answered
-                      ? "border-zinc-200 opacity-70 dark:border-zinc-800"
-                      : "border-zinc-300 active:bg-zinc-100 dark:border-zinc-700 dark:active:bg-zinc-800")
+                      ? "is-faded"
+                      : "")
               }
             >
               {value ? "True" : "False"}
               {answered && isPicked && (
-                <span className="text-sm font-semibold">Your answer</span>
+                <span className="text-sm font-medium">Your answer</span>
               )}
             </button>
           );
@@ -101,7 +101,7 @@ export function TrueFalsePlayer({ activity }: { activity: TrueFalseActivity }) {
               This statement is <strong>{statement.isTrue ? "true" : "false"}</strong>.
             </p>
           </Feedback>
-          <BigButton onClick={() => dispatch({ type: "next" })} className="sm:w-auto sm:self-end sm:px-10">
+          <BigButton onClick={() => dispatch({ type: "next" })} className="sm:w-auto sm:self-start">
             {last ? "See my score" : "Next"}
           </BigButton>
         </>

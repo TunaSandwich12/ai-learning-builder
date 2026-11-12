@@ -25,14 +25,13 @@ export function Feedback({
       tabIndex={-1}
       aria-live="polite"
       className={
-        "flex flex-col gap-2 rounded-xl p-4 outline-none " +
-        (right ? "bg-green-50 dark:bg-green-950" : "bg-red-50 dark:bg-red-950")
+        "flex flex-col gap-2 rounded-2xl border p-4 outline-none sm:p-5 " +
+        (right ? "border-good-line bg-good-bg" : "border-bad-line bg-bad-bg")
       }
     >
       <p
         className={
-          "text-lg font-bold " +
-          (right ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300")
+          "text-lg font-semibold " + (right ? "text-good-ink" : "text-bad-ink")
         }
       >
         {right ? "✓ Correct!" : "✗ Not quite."}

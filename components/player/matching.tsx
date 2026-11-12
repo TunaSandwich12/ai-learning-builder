@@ -73,24 +73,24 @@ function MatchingGame({ activity }: { activity: MatchingActivity }) {
         disabled={matched}
         aria-pressed={selected}
         className={
-          "flex min-h-12 w-full flex-col items-start gap-1 rounded-xl border-2 px-3 py-2.5 text-left text-base " +
+          "choice min-h-12 flex-col items-start justify-center gap-1 px-3 py-2.5 text-base " +
           (matched
-            ? "border-green-600 bg-green-50 dark:border-green-500 dark:bg-green-950"
+            ? "is-right"
             : wrong
-              ? "animate-pulse border-red-600 bg-red-50 motion-reduce:animate-none dark:border-red-500 dark:bg-red-950"
+              ? "is-wrong animate-pulse motion-reduce:animate-none"
               : selected
-                ? "border-zinc-900 bg-zinc-100 ring-2 ring-zinc-900/20 dark:border-zinc-100 dark:bg-zinc-800 dark:ring-zinc-100/20"
-                : "border-zinc-300 active:bg-zinc-100 dark:border-zinc-700 dark:active:bg-zinc-800")
+                ? ""
+                : "")
         }
       >
-        <span className={"max-w-full min-w-0 break-words " + (side === "left" ? "font-medium" : "")}>
+        <span className={"max-w-full min-w-0 break-words " + (side === "left" ? "font-semibold" : "")}>
           {text}
         </span>
         {matched && (
-          <span className="text-xs font-semibold text-green-800 dark:text-green-300">✓ Matched</span>
+          <span className="text-xs font-semibold text-good-ink">✓ Matched</span>
         )}
         {wrong && (
-          <span className="text-xs font-semibold text-red-800 dark:text-red-300">✗ Not a match</span>
+          <span className="text-xs font-semibold text-bad-ink">✗ Not a match</span>
         )}
       </button>
     );
@@ -98,7 +98,7 @@ function MatchingGame({ activity }: { activity: MatchingActivity }) {
 
   return (
     <section aria-label="Matching" className="flex flex-col gap-5">
-      <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm font-medium text-muted">
         Tap an item on the left, then its match on the right. {state.matched.length} of {n} matched.
       </p>
 
@@ -119,12 +119,12 @@ function MatchingGame({ activity }: { activity: MatchingActivity }) {
         </ul>
       </div>
 
-      <p aria-live="polite" className="min-h-6 text-center text-sm font-medium break-words">
+      <p aria-live="polite" className="min-h-6 text-sm font-semibold break-words">
         {announcement}
       </p>
 
       {complete && (
-        <BigButton onClick={() => dispatch({ type: "finish" })} className="sm:w-auto sm:self-end sm:px-10">
+        <BigButton onClick={() => dispatch({ type: "finish" })} className="sm:w-auto sm:self-start">
           See my score
         </BigButton>
       )}

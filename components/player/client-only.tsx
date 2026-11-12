@@ -26,7 +26,7 @@ export function ClientOnly({ children, fallback }: { children: ReactNode; fallba
 /** The fallback the shuffled players show until they're in the browser. */
 export function GettingReady() {
   return (
-    <p role="status" className="py-8 text-center text-zinc-500 dark:text-zinc-400">
+    <p role="status" className="py-8 text-muted">
       Getting ready…
     </p>
   );

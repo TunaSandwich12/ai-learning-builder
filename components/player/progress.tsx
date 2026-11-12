@@ -16,15 +16,12 @@ export function Progress({
   const percent = total > 0 ? ((index + (done ? 1 : 0)) / total) * 100 : 0;
   return (
     <div>
-      <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm font-medium text-muted">
         {label} {index + 1} of {total}
       </p>
-      <div
-        aria-hidden="true"
-        className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
-      >
+      <div aria-hidden="true" className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
         <div
-          className="h-full rounded-full bg-zinc-900 transition-[width] motion-reduce:transition-none dark:bg-zinc-100"
+          className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
           style={{ width: `${percent}%` }}
         />
       </div>

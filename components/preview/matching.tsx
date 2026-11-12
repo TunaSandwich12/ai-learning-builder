@@ -1,5 +1,5 @@
 import type { MatchingActivity } from "@/src/lib/schemas";
-import { PreviewHeader } from "./header";
+import { PreviewHeader, previewSheet } from "./header";
 
 // Read-only preview for the teacher. Every piece of AI text is placed as a
 // plain {value} child, so React escapes it. Never use dangerouslySetInnerHTML here.
@@ -7,17 +7,22 @@ import { PreviewHeader } from "./header";
 // view shuffles them.
 export function MatchingPreview({ activity }: { activity: MatchingActivity }) {
   return (
-    <section aria-labelledby="preview-title" className="flex flex-col gap-4">
+    <section aria-labelledby="preview-title" className={previewSheet}>
       <PreviewHeader title={activity.title} instructions={activity.instructions} />
 
-      <ol className="flex flex-col gap-3">
+      <p className="-mt-2 text-sm text-muted">Shown matched. Students see the right column shuffled.</p>
+
+      <ol className="flex flex-col divide-y divide-rule border-y border-rule">
         {activity.pairs.map((pair, i) => (
           <li
             key={i}
-            className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 rounded-lg border border-zinc-200 px-3 py-3 sm:gap-3 sm:px-4 dark:border-zinc-800"
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 py-3 sm:gap-4"
           >
-            <span className="min-w-0 font-medium break-words">{pair.left}</span>
-            <span aria-hidden="true" className="text-zinc-400 dark:text-zinc-500">
+            <span aria-hidden="true" className="num">
+              {i + 1}
+            </span>
+            <span className="min-w-0 font-semibold break-words">{pair.left}</span>
+            <span aria-hidden="true" className="text-muted">
               →
             </span>
             <span className="sr-only"> matches </span>

@@ -10,12 +10,14 @@ import { TrueFalsePlayer } from "./true-false";
 /** The student view of an activity: title, instructions and the right player for its type. */
 export function ActivityPlayer({ activity }: { activity: Activity }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <header className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-tight break-words">{activity.title}</h1>
-        <p className="mt-1 text-zinc-600 break-words dark:text-zinc-400">{activity.instructions}</p>
+        <h1 className="text-3xl font-bold break-words sm:text-4xl">{activity.title}</h1>
+        <p className="mt-3 max-w-prose text-lg break-words text-muted">{activity.instructions}</p>
       </header>
-      <Player activity={activity} />
+      <div className="card p-5 sm:p-8">
+        <Player activity={activity} />
+      </div>
     </div>
   );
 }

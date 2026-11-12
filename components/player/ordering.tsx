@@ -104,11 +104,11 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
   }
 
   const moveButtonClass =
-    "flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-300 text-lg active:bg-zinc-100 disabled:opacity-30 dark:border-zinc-700 dark:active:bg-zinc-800";
+    "flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-lg enabled:hover:border-primary disabled:opacity-30";
 
   return (
     <section aria-label="Put in order" className="flex flex-col gap-5">
-      <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm font-medium text-muted">
         {checked
           ? `${score} of ${n} in the right place.`
           : "Drag the handle, or use the arrows, to put the items in order (first at the top)."}
@@ -122,14 +122,14 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
             <li
               key={item}
               className={
-                "flex items-center gap-2 rounded-xl border-2 bg-white p-2 dark:bg-zinc-950 " +
+                "flex items-center gap-2 rounded-2xl border-[1.5px] p-2 " +
                 (checked
                   ? mark.right
-                    ? "border-green-600 bg-green-50 dark:border-green-500 dark:bg-green-950"
-                    : "border-red-600 bg-red-50 dark:border-red-500 dark:bg-red-950"
+                    ? "border-good-line bg-good-bg"
+                    : "border-bad-line bg-bad-bg"
                   : isDragging
-                    ? "relative z-10 border-zinc-900 shadow-lg dark:border-zinc-100"
-                    : "border-zinc-300 dark:border-zinc-700")
+                    ? "relative z-10 border-primary bg-tint"
+                    : "border-line bg-surface")
               }
             >
               {!checked && (
@@ -141,13 +141,13 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
                   onPointerMove={drag}
                   onPointerUp={endDrag}
                   onPointerCancel={endDrag}
-                  className="flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-xl text-zinc-400 select-none active:cursor-grabbing dark:text-zinc-500"
+                  className="flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-xl text-muted select-none active:cursor-grabbing"
                 >
                   ⠿
                 </div>
               )}
 
-              <span className="w-6 shrink-0 text-center font-semibold text-zinc-500 dark:text-zinc-400">
+              <span className="num">
                 {position + 1}
               </span>
 
@@ -156,8 +156,7 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
                 {checked && (
                   <p
                     className={
-                      "mt-1 text-sm font-semibold " +
-                      (mark.right ? "text-green-800 dark:text-green-300" : "text-red-800 dark:text-red-300")
+                      "mt-1 text-sm font-semibold " + (mark.right ? "text-good-ink" : "text-bad-ink")
                     }
                   >
                     {mark.right ? "✓ Right place" : `✗ Should be #${item + 1}`}
@@ -205,7 +204,7 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
       </p>
 
       {checked ? (
-        <BigButton onClick={() => setFinished(true)} className="sm:w-auto sm:self-end sm:px-10">
+        <BigButton onClick={() => setFinished(true)} className="sm:w-auto sm:self-start">
           See my score
         </BigButton>
       ) : (
@@ -214,7 +213,7 @@ function OrderingGame({ activity }: { activity: OrderingActivity }) {
             setChecked(true);
             setAnnouncement(`${score} of ${n} in the right place.`);
           }}
-          className="sm:w-auto sm:self-end sm:px-10"
+          className="sm:w-auto sm:self-start"
         >
           Check my order
         </BigButton>
