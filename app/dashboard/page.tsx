@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { activityTypeLabel } from "@/src/lib/activity-types";
-import { DeleteActivityButton, LogoutButton } from "./buttons";
+import { DeleteActivityButton } from "./buttons";
 
 export const metadata: Metadata = { title: "Dashboard · AI Learning Builder" };
 
@@ -33,8 +33,8 @@ export default function DashboardPage() {
 
 function DashboardLoading() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-      <p role="status" className="text-zinc-500 dark:text-zinc-400">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <p role="status" className="text-muted">
         Loading…
       </p>
     </main>
@@ -59,74 +59,71 @@ async function Dashboard() {
   const activities = (data ?? []) as ActivityRow[];
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3">
-          <p className="min-w-0 truncate text-sm text-zinc-600 dark:text-zinc-400">{claims.email}</p>
-          <LogoutButton />
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-        <h1 className="mb-4 text-2xl font-bold tracking-tight">Your activities</h1>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <NewActivityLink />
-        </div>
-
-        <div className="mt-6">
-          {error ? (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-              Couldn&apos;t load your activities. Refresh the page to try again.
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-12">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold sm:text-4xl">Your activities</h1>
+          {!error && activities.length > 0 && (
+            <p className="mt-1.5 text-muted">
+              {activities.length === 1 ? "1 activity" : `${activities.length} activities`}, newest first.
             </p>
-          ) : activities.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-zinc-300 px-4 py-8 text-center dark:border-zinc-700">
-              <p className="text-zinc-600 dark:text-zinc-400">No activities yet. Create your first one.</p>
-              <NewActivityLink />
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {activities.map((activity) => (
-                <li
-                  key={activity.id}
-                  className="flex flex-wrap items-stretch gap-2 rounded-lg border border-zinc-200 p-2 dark:border-zinc-800"
-                >
-                  <Link
-                    href={`/activities/${activity.id}`}
-                    className="min-w-0 flex-1 rounded-md px-2 py-2 active:bg-zinc-100 dark:active:bg-zinc-800"
-                  >
-                    <p className="font-medium break-words">{activity.title}</p>
-                    <p className="mt-1 flex flex-wrap gap-x-2 text-sm text-zinc-500 dark:text-zinc-400">
-                      <span className="rounded bg-zinc-100 px-1.5 dark:bg-zinc-800">
-                        {activityTypeLabel(activity.type)}
-                      </span>
-                      {activity.is_public && (
-                        <span className="rounded bg-green-50 px-1.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
-                          Shared
-                        </span>
-                      )}
-                      <time dateTime={activity.updated_at}>
-                        {dateFormat.format(new Date(activity.updated_at))}
-                      </time>
-                    </p>
-                  </Link>
-                  <DeleteActivityButton id={activity.id} title={activity.title} />
-                </li>
-              ))}
-            </ul>
           )}
         </div>
-      </main>
-    </div>
+        {activities.length > 0 && <NewActivityLink />}
+      </div>
+
+      <div className="mt-8">
+        {error ? (
+          <p role="alert" className="alert alert-bad">
+            Couldn&apos;t load your activities. Refresh the page to try again.
+          </p>
+        ) : activities.length === 0 ? (
+          <div className="card flex flex-col items-center gap-4 px-6 py-14 text-center">
+            <h2 className="text-2xl">Make your first activity</h2>
+            <p className="max-w-md text-muted">
+              Choose a type, describe what you&apos;re teaching, and you&apos;ll get a draft to check
+              and adjust before you share it with your class.
+            </p>
+            <NewActivityLink />
+          </div>
+        ) : (
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activities.map((activity) => (
+              <li key={activity.id} className="card flex flex-col gap-4 p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="tag">{activityTypeLabel(activity.type)}</span>
+                  {activity.is_public && <span className="tag tag-good">Shared</span>}
+                </div>
+                <Link
+                  href={`/activities/${activity.id}`}
+                  className="rounded-lg text-lg leading-snug font-semibold break-words hover:text-tint-ink"
+                >
+                  {activity.title}
+                </Link>
+                <p className="mt-auto text-sm text-muted">
+                  Edited{" "}
+                  <time dateTime={activity.updated_at}>
+                    {dateFormat.format(new Date(activity.updated_at))}
+                  </time>
+                </p>
+                <div className="flex flex-wrap items-start gap-2 border-t border-rule pt-4">
+                  <Link href={`/activities/${activity.id}`} className="btn btn-soft">
+                    Open
+                  </Link>
+                  <DeleteActivityButton id={activity.id} title={activity.title} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </main>
   );
 }
 
 function NewActivityLink() {
   return (
-    <Link
-      href="/activities/new"
-      className="flex h-12 w-full items-center justify-center rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
-    >
+    <Link href="/activities/new" className="btn btn-primary self-start sm:self-auto">
       New activity
     </Link>
   );

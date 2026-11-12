@@ -49,7 +49,7 @@ describe("ActivityPreview", () => {
   test("flashcards label the front and back of every card", () => {
     const html = render(samples.flashcards);
     const n = samples.flashcards.cards.length;
-    expect(html.match(/· Front/g)).toHaveLength(n);
+    expect(html.match(/>Front</g)).toHaveLength(n);
     expect(html.match(/>Back</g)).toHaveLength(n);
   });
 
@@ -68,7 +68,7 @@ describe("ActivityPreview", () => {
     const order = positions(html, items);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     items.forEach((item, i) => {
-      expect(html).toContain(`>${i + 1}</span><span class="min-w-0 pt-0.5 break-words">${escaped(item)}<`);
+      expect(html).toContain(`>${i + 1}</span><span class="min-w-0 break-words">${escaped(item)}<`);
     });
   });
 

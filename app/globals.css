@@ -1,26 +1,300 @@
 @import "tailwindcss";
 
+/*
+ * Design system: clean study app.
+ *
+ * Airy pale-blue page, white rounded cards with a soft shadow, pill buttons and
+ * one bright blue for actions. Poppins throughout. Dark mode swaps to a deep
+ * navy page with slate cards.
+ *
+ * Components use the semantic names below (bg-paper, text-muted, border-rule…)
+ * and never raw colours, so dark mode needs no `dark:` classes: the variables
+ * switch underneath. Every text colour is at least 4.5:1 on the surfaces it sits
+ * on, and every control outline (--line) is at least 3:1.
+ * Flat colours only: no gradients, no purple.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --paper: #f9fbff;
+  --surface: #ffffff;
+  --surface-2: #f1f4f9;
+  --ink: #1b212d;
+  --muted: #586274;
+  --rule: #e3e7ee; /* decorative dividers and card edges */
+  --line: #848d9c; /* outlines of inputs and buttons */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --primary: #0066d9;
+  --primary-hover: #0057ba;
+  --on-primary: #ffffff;
+  --tint: #ecf5ff; /* pale blue fill: selected states, number badges */
+  --tint-ink: #0059bf; /* blue text on the tint */
+
+  --good-ink: #22700a;
+  --good-bg: #ecfdec;
+  --good-line: #3d9a1a;
+  --bad-ink: #c0072a;
+  --bad-bg: #ffeceb;
+  --bad-line: #e8384f;
+  --bad-hover: #9e0622;
+  --warn-ink: #9a4f00;
+
+  --focus: #0066d9;
+  --shadow: 0 2px 14px rgb(27 33 45 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #1b212d;
+    --surface: #242c3c;
+    --surface-2: #2f3747;
+    --ink: #ffffff;
+    --muted: #aab3c2;
+    --rule: #364052;
+    --line: #75809a;
+
+    --primary: #51a9fe;
+    --primary-hover: #a0ceff;
+    --on-primary: #10151f;
+    --tint: #233552;
+    --tint-ink: #a0ceff;
+
+    --good-ink: #7ddf52;
+    --good-bg: #1f3324;
+    --good-line: #59b934;
+    --bad-ink: #ff8b90;
+    --bad-bg: #3a2429;
+    --bad-line: #ff6269;
+    --bad-hover: #ffb0b3;
+    --warn-ink: #ffb357;
+
+    --focus: #51a9fe;
+    --shadow: 0 2px 14px rgb(0 0 0 / 0.25);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-tint: var(--tint);
+  --color-tint-ink: var(--tint-ink);
+  --color-good-ink: var(--good-ink);
+  --color-good-bg: var(--good-bg);
+  --color-good-line: var(--good-line);
+  --color-bad-ink: var(--bad-ink);
+  --color-bad-bg: var(--bad-bg);
+  --color-bad-line: var(--bad-line);
+  --color-warn-ink: var(--warn-ink);
+
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-poppins), system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--tint);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  /* Buttons: pills. Size modifier: .btn-lg (players, hero). */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.375rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    transition: background-color 120ms, border-color 120ms, color 120ms;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-lg {
+    min-height: 3.25rem;
+    padding-inline: 2rem;
+    font-size: 1rem;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--primary-hover);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  .btn-secondary:not(:disabled):hover {
+    background: var(--surface-2);
+  }
+  /* Pale blue button for low-emphasis actions next to a primary one. */
+  .btn-soft {
+    background: var(--tint);
+    color: var(--tint-ink);
+  }
+  .btn-soft:not(:disabled):hover {
+    border-color: var(--tint-ink);
+  }
+  .btn-danger {
+    background: var(--bad-ink);
+    color: var(--surface);
+  }
+  .btn-danger:not(:disabled):hover {
+    background: var(--bad-hover);
+  }
+
+  /* Form fields. */
+  .field {
+    width: 100%;
+    min-height: 2.875rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 1rem;
+  }
+  .field::placeholder {
+    color: var(--muted);
+  }
+  .field:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--tint), 0 0 0 4px var(--primary);
+  }
+
+  /* White rounded card: the main content container. */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  /* Round number badge (steps, list items). */
+  .num {
+    display: inline-flex;
+    height: 1.75rem;
+    min-width: 1.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: var(--tint);
+    color: var(--tint-ink);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  /* Messages. */
+  .alert {
+    border-radius: 0.75rem;
+    border: 1px solid;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    overflow-wrap: anywhere;
+  }
+  .alert-bad {
+    background: var(--bad-bg);
+    border-color: var(--bad-line);
+    color: var(--bad-ink);
+  }
+  .alert-good {
+    background: var(--good-bg);
+    border-color: var(--good-line);
+    color: var(--good-ink);
+  }
+
+  /* Small pill tag, e.g. the activity type on the dashboard. */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    background: var(--tint);
+    color: var(--tint-ink);
+  }
+  .tag-good {
+    background: var(--good-bg);
+    color: var(--good-ink);
+  }
+
+  /* Answer buttons in the players. State: .is-right / .is-wrong / .is-faded. */
+  .choice {
+    display: flex;
+    width: 100%;
+    min-height: 3.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--line);
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--ink);
+    text-align: left;
+    font-size: 1rem;
+    transition: background-color 120ms, border-color 120ms;
+  }
+  .choice:not(:disabled):hover {
+    border-color: var(--primary);
+  }
+  .choice[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--tint);
+  }
+  .choice.is-right {
+    border-color: var(--good-line);
+    background: var(--good-bg);
+  }
+  .choice.is-wrong {
+    border-color: var(--bad-line);
+    background: var(--bad-bg);
+  }
+  .choice.is-faded {
+    color: var(--muted);
+  }
 }

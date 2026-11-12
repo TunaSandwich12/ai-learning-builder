@@ -1,25 +1,30 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { SiteHeader } from "@/components/ui/header";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = { title: "Log in · AI Learning Builder" };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
-    <main className="flex flex-1 flex-col justify-center px-4 py-10">
-      <div className="mx-auto w-full max-w-sm">
-        <h1 className="text-2xl font-bold tracking-tight">AI Learning Builder</h1>
-        <p className="mt-1 mb-8 text-zinc-600 dark:text-zinc-400">
-          Log in, or create a teacher account.
-        </p>
+    <div className="flex flex-1 flex-col">
+      <SiteHeader href="/" />
 
-        <Suspense fallback={null}>
-          <ConfirmError searchParams={searchParams} />
-        </Suspense>
+      <main className="flex flex-1 items-start justify-center px-4 py-12 sm:items-center sm:py-16">
+        <div className="card w-full max-w-md px-6 py-8 sm:px-10 sm:py-10">
+          <h1 className="text-3xl font-bold">Log in</h1>
+          <p className="mt-2 mb-8 text-muted">
+            Use your teacher account, or create one with your email.
+          </p>
 
-        <LoginForm />
-      </div>
-    </main>
+          <Suspense fallback={null}>
+            <ConfirmError searchParams={searchParams} />
+          </Suspense>
+
+          <LoginForm />
+        </div>
+      </main>
+    </div>
   );
 }
 
@@ -29,10 +34,7 @@ async function ConfirmError({ searchParams }: Pick<PageProps<"/login">, "searchP
   if (error !== "confirm") return null;
 
   return (
-    <p
-      role="alert"
-      className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-    >
+    <p role="alert" className="alert alert-bad mb-6">
       That confirmation link didn&apos;t work or has expired. Try logging in, or sign up again.
     </p>
   );

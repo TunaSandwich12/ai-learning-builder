@@ -1,69 +1,128 @@
-import Image from "next/image";
+import Link from "next/link";
+import { SiteHeader } from "@/components/ui/header";
+import { activityTypeOptions } from "@/src/lib/activity-types";
+import { samples } from "@/src/lib/samples";
+
+const steps = [
+  {
+    title: "Describe it",
+    text: "Pick an activity type and write what you want, or paste your lesson notes.",
+  },
+  {
+    title: "Check and adjust",
+    text: "Read every question and answer before anyone sees it. Ask for changes in plain words.",
+  },
+  {
+    title: "Share the link",
+    text: "Students open it on a phone or laptop. No accounts, nothing to install.",
+  },
+];
+
+// A real sample question, shown the way a student sees it after answering.
+const demo = samples.multiple_choice;
+const demoQuestion = demo.questions[0];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-1 flex-col">
+      <SiteHeader href="/">
+        <div className="flex items-center gap-2">
+          <Link href="/login" className="btn btn-secondary hidden sm:inline-flex">
+            Log in
+          </Link>
+          <Link href="/login" className="btn btn-primary">
+            Get started
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </SiteHeader>
+
+      <main className="flex-1">
+        <section
+          aria-labelledby="home-title"
+          className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pt-14 pb-16 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-24"
+        >
+          <div>
+            <h1 id="home-title" className="text-4xl font-bold sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
+              Classroom activities, ready before the bell
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted">
+              Turn a topic or your own notes into a quiz, flashcards or a matching game. Check it,
+              change it, then share one link with your class.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href="/login" className="btn btn-primary btn-lg">
+                Create your first activity
+              </Link>
+              <span className="text-sm text-muted">Students don&apos;t need an account.</span>
+            </div>
+          </div>
+
+          {/* Static picture of the student view. Not interactive, so hidden from screen readers. */}
+          <div aria-hidden="true" className="card p-5 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <span className="tag">Multiple choice</span>
+              <span className="text-sm font-medium text-muted">
+                Question 1 of {demo.questions.length}
+              </span>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
+              <div className="h-full w-1/6 rounded-full bg-primary" />
+            </div>
+            <p className="mt-5 text-lg font-semibold">{demoQuestion.question}</p>
+            <ul className="mt-4 flex flex-col gap-2">
+              {demoQuestion.options.map((option) => (
+                <li
+                  key={option.text}
+                  className={
+                    "flex items-center justify-between rounded-2xl border-[1.5px] px-4 py-2.5 " +
+                    (option.isCorrect ? "border-good-line bg-good-bg" : "border-rule")
+                  }
+                >
+                  <span>{option.text}</span>
+                  {option.isCorrect && <span className="text-sm font-semibold text-good-ink">Correct</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section aria-labelledby="how-title" className="border-y border-rule bg-surface">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <h2 id="how-title" className="text-3xl font-bold">
+              How it works
+            </h2>
+            <ol className="mt-10 grid gap-6 sm:grid-cols-3">
+              {steps.map((step, i) => (
+                <li key={step.title} className="rounded-[1.25rem] bg-paper p-6">
+                  <span className="num">{i + 1}</span>
+                  <h3 className="mt-4 text-lg">{step.title}</h3>
+                  <p className="mt-2 text-muted">{step.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section aria-labelledby="types-title" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+          <h2 id="types-title" className="text-3xl font-bold">
+            Five kinds of activity
+          </h2>
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activityTypeOptions.map((option) => (
+              <li key={option.type} className="card p-6">
+                <h3 className="text-lg">{option.label}</h3>
+                <p className="mt-1.5 text-muted">{option.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
       </main>
+
+      <footer className="border-t border-rule bg-surface">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 text-sm text-muted sm:px-6">
+          AI Learning Builder. Made for classrooms.
+        </div>
+      </footer>
     </div>
   );
 }

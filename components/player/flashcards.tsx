@@ -76,23 +76,20 @@ export function FlashcardsPlayer({ activity }: { activity: FlashcardsActivity })
         type="button"
         onClick={flip}
         className={
-          "flex min-h-52 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 px-5 py-6 text-center shadow-sm active:scale-[0.99] motion-reduce:active:scale-100 " +
-          (showBack
-            ? "border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-900"
-            : "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-950")
+          "flex min-h-60 w-full flex-col items-center justify-center gap-4 rounded-3xl border-[1.5px] px-6 py-8 text-center transition-colors " +
+          (showBack ? "border-primary bg-tint" : "border-line bg-surface hover:border-primary")
         }
       >
-        <span className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-          {showBack ? "Back" : "Front"}
-        </span>
+        <span className="tag">{showBack ? "Back" : "Front"}</span>
         <span
           className={
-            "max-w-full min-w-0 break-words " + (showBack ? "text-xl" : "text-2xl font-bold")
+            "max-w-full min-w-0 break-words " +
+            (showBack ? "text-xl" : "text-2xl font-semibold sm:text-3xl")
           }
         >
           {showBack ? card.back : card.front}
         </span>
-        <span className="text-sm text-zinc-500 dark:text-zinc-400">
+        <span className="text-sm text-muted">
           {showBack ? "Tap to see the front" : "Tap to flip"}
         </span>
       </button>
@@ -102,20 +99,20 @@ export function FlashcardsPlayer({ activity }: { activity: FlashcardsActivity })
           <button
             type="button"
             onClick={() => rate("knew")}
-            className="min-h-14 rounded-xl border-2 border-green-600 bg-green-50 px-3 py-3 text-lg font-semibold text-green-900 active:bg-green-100 dark:border-green-500 dark:bg-green-950 dark:text-green-200 dark:active:bg-green-900"
+            className="btn btn-lg border-good-line bg-good-bg px-3 text-good-ink"
           >
             I knew it
           </button>
           <button
             type="button"
             onClick={() => rate("learning")}
-            className="min-h-14 rounded-xl border-2 border-zinc-300 px-3 py-3 text-lg font-semibold active:bg-zinc-100 dark:border-zinc-700 dark:active:bg-zinc-800"
+            className="btn btn-secondary btn-lg px-3"
           >
             Still learning
           </button>
         </div>
       ) : (
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-center text-sm text-muted">
           Flip the card to check your answer.
         </p>
       )}

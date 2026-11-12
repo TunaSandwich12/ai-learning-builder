@@ -11,7 +11,7 @@ export function LogoutButton() {
     <form action={signOut}>
       <PendingButton
         pendingText="Logging out…"
-        className="h-11 rounded-lg border border-zinc-300 px-4 text-sm font-semibold active:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:active:bg-zinc-800"
+        className="btn btn-secondary"
       >
         Log out
       </PendingButton>
@@ -65,7 +65,7 @@ export function DeleteActivityButton({ id, title }: { id: string; title: string 
   }
 
   return (
-    <div className="flex basis-full flex-col gap-2 sm:basis-auto" onKeyDown={handleKeyDown}>
+    <div className="flex flex-col gap-2" onKeyDown={handleKeyDown}>
       {mode === "idle" ? (
         <button
           ref={deleteRef}
@@ -75,7 +75,7 @@ export function DeleteActivityButton({ id, title }: { id: string; title: string 
             setMode("confirm");
           }}
           aria-label={`Delete ${title}`}
-          className="h-11 rounded-lg border border-zinc-300 px-4 text-sm font-semibold text-red-700 active:bg-red-50 sm:my-auto dark:border-zinc-700 dark:text-red-300 dark:active:bg-red-950"
+          className="btn btn-secondary self-start text-bad-ink"
         >
           Delete
         </button>
@@ -83,16 +83,16 @@ export function DeleteActivityButton({ id, title }: { id: string; title: string 
         <div
           role="group"
           aria-label={`Confirm delete ${title}`}
-          className="flex flex-col gap-2 rounded-lg bg-red-50 px-3 py-3 sm:flex-row sm:items-center dark:bg-red-950"
+          className="flex flex-col gap-3 rounded-2xl border border-bad-line bg-bad-bg p-4"
         >
-          <p className="text-sm font-medium text-red-800 dark:text-red-200">Delete this activity?</p>
+          <p className="text-sm font-semibold text-bad-ink">Delete this activity? This can&apos;t be undone.</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={confirmDelete}
               disabled={mode === "deleting"}
               aria-busy={mode === "deleting"}
-              className="h-11 flex-1 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white active:bg-red-800 disabled:opacity-60 sm:flex-none"
+              className="btn btn-danger flex-1 sm:flex-none"
             >
               {mode === "deleting" ? "Deleting…" : "Yes, delete"}
             </button>
@@ -101,7 +101,7 @@ export function DeleteActivityButton({ id, title }: { id: string; title: string 
               type="button"
               onClick={() => setMode("idle")}
               disabled={mode === "deleting"}
-              className="h-11 flex-1 rounded-lg border border-zinc-300 bg-white px-4 text-sm font-semibold active:bg-zinc-100 disabled:opacity-60 sm:flex-none dark:border-zinc-700 dark:bg-zinc-900 dark:active:bg-zinc-800"
+              className="btn btn-secondary flex-1 sm:flex-none"
             >
               Keep
             </button>
@@ -109,7 +109,7 @@ export function DeleteActivityButton({ id, title }: { id: string; title: string 
         </div>
       )}
       {error && (
-        <p role="alert" className="text-sm text-red-700 break-words dark:text-red-300">
+        <p role="alert" className="text-sm font-semibold break-words text-bad-ink">
           {error}
         </p>
       )}

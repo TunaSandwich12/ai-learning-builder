@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { ActivityPreview } from "@/components/preview";
 import { activityTypeInfo, activityTypeOptions } from "@/src/lib/activity-types";
 import { FALLBACK_ERROR, readGenerateResponse } from "@/src/lib/generate-client";
@@ -131,128 +131,171 @@ export function ActivityForm({ initial }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <fieldset>
-        <legend className="mb-3 text-base font-semibold">What kind of activity?</legend>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {activityTypeOptions.map((option) => {
-            const selected = option.type === type;
-            return (
-              <button
-                key={option.type}
-                type="button"
-                aria-pressed={selected}
-                disabled={busy}
-                onClick={() => chooseType(option.type)}
-                className={
-                  "min-h-16 rounded-lg border-2 px-4 py-3 text-left disabled:opacity-60 " +
-                  (selected
-                    ? "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
-                    : "border-zinc-200 active:bg-zinc-100 dark:border-zinc-800 dark:active:bg-zinc-800")
-                }
-              >
-                <span className="block text-base font-semibold">{option.label}</span>
-                <span className="mt-0.5 block text-sm text-zinc-600 dark:text-zinc-400">
-                  {option.description}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
+      <Step number={1} title="Choose a type" headingId="step-type">
+        <fieldset>
+          <legend className="sr-only">What kind of activity?</legend>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {activityTypeOptions.map((option) => {
+              const selected = option.type === type;
+              return (
+                <button
+                  key={option.type}
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={busy}
+                  onClick={() => chooseType(option.type)}
+                  className={
+                    "flex min-h-16 items-start gap-3 rounded-2xl border-[1.5px] px-4 py-3.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
+                    (selected
+                      ? "border-primary bg-tint"
+                      : "border-line bg-surface enabled:hover:border-primary")
+                  }
+                >
+                  {/* Radio-style marker: filled when chosen. aria-pressed carries the meaning. */}
+                  <span
+                    aria-hidden="true"
+                    className={
+                      "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 " +
+                      (selected ? "border-primary" : "border-line")
+                    }
+                  >
+                    {selected && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                  </span>
+                  <span>
+                    <span className="block font-semibold">{option.label}</span>
+                    <span className="mt-0.5 block text-sm text-muted">{option.description}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      </Step>
 
       {type && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <label htmlFor="request" className="text-base font-semibold">
-            Describe your activity, or paste your notes
-          </label>
-          <textarea
-            id="request"
-            name="request"
-            rows={8}
-            maxLength={MAX_REQUEST_LENGTH}
-            value={request}
-            onChange={(e) => setRequest(e.target.value)}
-            placeholder={activityTypeInfo[type].placeholder}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-zinc-300 dark:focus:ring-zinc-300/20"
-          />
+        <Step number={2} title="Describe it" headingId="step-describe">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <label htmlFor="request" className="text-muted">
+              Say what you want, or paste your lesson notes. Include the grade and how many items.
+            </label>
+            <textarea
+              id="request"
+              name="request"
+              rows={7}
+              maxLength={MAX_REQUEST_LENGTH}
+              value={request}
+              onChange={(e) => setRequest(e.target.value)}
+              placeholder={activityTypeInfo[type].placeholder}
+              className="field leading-relaxed"
+            />
 
-          <button
-            type="submit"
-            disabled={busy || !request.trim()}
-            aria-busy={creating}
-            className="h-12 w-full rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 disabled:opacity-60 sm:w-auto sm:self-start sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
-          >
-            {creating ? "Creating your activity…" : "Create activity"}
-          </button>
-
-          <div aria-live="polite" className="sr-only">
-            {creating ? "Creating your activity…" : ""}
-          </div>
-
-          {error && (
-            <p
-              role="alert"
-              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 break-words dark:bg-red-950 dark:text-red-300"
+            <button
+              type="submit"
+              disabled={busy || !request.trim()}
+              aria-busy={creating}
+              className="btn btn-primary mt-1 self-start"
             >
-              {error}
-            </p>
-          )}
-        </form>
+              {creating ? "Creating your activity…" : "Create activity"}
+            </button>
+
+            <div aria-live="polite" className="sr-only">
+              {creating ? "Creating your activity…" : ""}
+            </div>
+
+            {error && (
+              <p role="alert" className="alert alert-bad">
+                {error}
+              </p>
+            )}
+          </form>
+        </Step>
       )}
 
       {activity && type && (
-        <div className="flex flex-col gap-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-          <ActivityPreview activity={activity} />
-          <RefineChat
-            key={chatKey}
-            type={type}
-            activity={activity}
-            onUpdated={handleRefined}
-            onBusyChange={setRefining}
-          />
-
-          <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4 sm:flex-row sm:items-center sm:gap-4 dark:border-zinc-800">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={busy || saveState === "saved"}
-              aria-busy={saving}
-              className="h-12 w-full rounded-lg bg-zinc-900 text-base font-semibold text-white active:bg-zinc-700 disabled:opacity-60 sm:w-auto sm:px-6 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300"
-            >
-              {saving ? "Saving…" : "Save"}
-            </button>
-            <p
-              aria-live="polite"
-              className={
-                "text-sm " +
-                (saveState === "unsaved"
-                  ? "text-amber-700 dark:text-amber-300"
-                  : "text-zinc-600 dark:text-zinc-400")
-              }
-            >
-              {SAVE_STATUS_TEXT[saveState]}
+        <>
+          <Step number={3} title="Check the draft" headingId="step-check">
+            <p className="-mt-2 mb-5 text-muted">
+              This is exactly what students will get. Read it through, then ask for any changes.
             </p>
-          </div>
+            <div className="flex flex-col gap-8">
+              <ActivityPreview activity={activity} />
+              <RefineChat
+                key={chatKey}
+                type={type}
+                activity={activity}
+                onUpdated={handleRefined}
+                onBusyChange={setRefining}
+              />
+            </div>
+          </Step>
 
-          {saveError && (
-            <p
-              role="alert"
-              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 break-words dark:bg-red-950 dark:text-red-300"
-            >
-              {saveError}
-            </p>
-          )}
+          <Step number={4} title="Save and share" headingId="step-share">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={busy || saveState === "saved"}
+                  aria-busy={saving}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+                <p
+                  aria-live="polite"
+                  className={
+                    "text-sm font-semibold " + (saveState === "unsaved" ? "text-warn-ink" : "text-muted")
+                  }
+                >
+                  {SAVE_STATUS_TEXT[saveState]}
+                </p>
+              </div>
 
-          <SharePanel
-            id={savedId}
-            canShare={savedId !== null && saveState === "saved"}
-            disabled={creating || refining || saving}
-            isPublic={isPublic}
-            onChange={setIsPublic}
-            onBusyChange={setSharing}
-          />
-        </div>
+              {saveError && (
+                <p role="alert" className="alert alert-bad">
+                  {saveError}
+                </p>
+              )}
+
+              <SharePanel
+                id={savedId}
+                canShare={savedId !== null && saveState === "saved"}
+                disabled={creating || refining || saving}
+                isPublic={isPublic}
+                onChange={setIsPublic}
+                onBusyChange={setSharing}
+              />
+            </div>
+          </Step>
+        </>
       )}
     </div>
+  );
+}
+
+/** One numbered step of the editor: a card with a number badge, heading, then the content. */
+function Step({
+  number,
+  title,
+  headingId,
+  children,
+}: {
+  number: number;
+  title: string;
+  headingId: string;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={headingId} className="card p-5 sm:p-8">
+      <div className="mb-5 flex items-center gap-3">
+        <span aria-hidden="true" className="num">
+          {number}
+        </span>
+        <h2 id={headingId} className="text-xl">
+          {title}
+        </h2>
+      </div>
+      {children}
+    </section>
   );
 }

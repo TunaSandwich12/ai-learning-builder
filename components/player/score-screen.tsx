@@ -19,20 +19,20 @@ export function ScoreScreen({
   useEffect(() => headingRef.current?.focus(), []);
 
   return (
-    <section aria-labelledby="score" className="flex flex-col items-center gap-4 py-8 text-center">
-      <p className="text-base text-zinc-600 dark:text-zinc-400">Your score</p>
-      <h2 id="score" ref={headingRef} tabIndex={-1} className="text-4xl font-bold outline-none">
+    <section aria-labelledby="score" className="flex flex-col items-center gap-3 py-6 text-center">
+      <p className="font-medium text-muted">Your score</p>
+      <h2 id="score" ref={headingRef} tabIndex={-1} className="text-5xl font-bold text-tint-ink outline-none sm:text-6xl">
         {scoreText(correct, total)}
       </h2>
       <p className="text-lg">{scoreMessage(correct, total)}</p>
-      <BigButton onClick={onPlayAgain} className="mt-2 sm:w-auto sm:px-10">
+      <BigButton onClick={onPlayAgain} className="mt-4 sm:w-auto">
         Play again
       </BigButton>
     </section>
   );
 }
 
-/** The large dark button used for Next / See my score / Play again (56px tall). */
+/** The large primary button used for Next / See my score / Play again (56px tall). */
 export function BigButton({
   children,
   onClick,
@@ -50,7 +50,7 @@ export function BigButton({
       onClick={onClick}
       disabled={disabled}
       className={
-        "h-14 w-full rounded-xl bg-zinc-900 px-6 text-lg font-semibold text-white active:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:active:bg-zinc-300 " +
+        "btn btn-primary btn-lg w-full " +
         className
       }
     >

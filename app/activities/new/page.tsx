@@ -11,18 +11,23 @@ export const metadata: Metadata = { title: "New activity · AI Learning Builder"
 // <Suspense> and streamed after the static shell.
 export default function NewActivityPage() {
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-      <Link
-        href="/dashboard"
-        className="inline-flex h-11 items-center text-sm font-medium text-zinc-600 dark:text-zinc-400"
-      >
-        ← Back to dashboard
-      </Link>
-      <h1 className="mt-2 mb-6 text-2xl font-bold tracking-tight">New activity</h1>
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+      <nav aria-label="Breadcrumb" className="text-sm">
+        <ol className="flex flex-wrap items-center gap-2 text-muted">
+          <li>
+            <Link href="/dashboard" className="font-semibold text-tint-ink hover:underline hover:underline-offset-4">
+              Your activities
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page">New activity</li>
+        </ol>
+      </nav>
+      <h1 className="mt-3 mb-8 text-3xl font-bold sm:text-4xl">New activity</h1>
 
       <Suspense
         fallback={
-          <p role="status" className="text-zinc-500 dark:text-zinc-400">
+          <p role="status" className="text-muted">
             Loading…
           </p>
         }

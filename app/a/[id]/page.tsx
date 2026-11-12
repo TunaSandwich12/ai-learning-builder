@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ActivityPlayer } from "@/components/player/ActivityPlayer";
+import { SiteHeader } from "@/components/ui/header";
 import { activityIdSchema, parseSharedRow } from "@/src/lib/load-activity";
 import { createClient } from "@/src/lib/supabase/server";
 
@@ -16,17 +17,20 @@ export const metadata: Metadata = {
 // streamed after the static shell.
 export default function SharedActivityPage({ params }: PageProps<"/a/[id]">) {
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
-      <Suspense
-        fallback={
-          <p role="status" className="text-zinc-500 dark:text-zinc-400">
-            Loading…
-          </p>
-        }
-      >
-        <SharedActivity params={params} />
-      </Suspense>
-    </main>
+    <div className="flex flex-1 flex-col">
+      <SiteHeader href="/" />
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <Suspense
+          fallback={
+            <p role="status" className="text-muted">
+              Loading…
+            </p>
+          }
+        >
+          <SharedActivity params={params} />
+        </Suspense>
+      </main>
+    </div>
   );
 }
 

@@ -53,19 +53,19 @@ export function MultipleChoicePlayer({ activity }: { activity: MultipleChoiceAct
   const last = state.index === total - 1;
 
   return (
-    <section aria-labelledby="question" className="flex flex-col gap-5">
+    <section aria-labelledby="question" className="flex flex-col gap-6">
       <Progress label="Question" index={state.index} total={total} done={answered} />
 
       <h2
         id="question"
         ref={questionRef}
         tabIndex={-1}
-        className="text-xl font-semibold break-words outline-none"
+        className="text-xl break-words outline-none sm:text-2xl"
       >
         {question.question}
       </h2>
 
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-2.5">
         {question.options.map((option, oi) => {
           // Nothing about the answer is shown until the student picks.
           const isPicked = picked === oi;
@@ -79,24 +79,23 @@ export function MultipleChoicePlayer({ activity }: { activity: MultipleChoiceAct
                 disabled={answered}
                 aria-pressed={isPicked}
                 className={
-                  "flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border-2 px-4 py-3 text-left text-lg " +
-                  (showCorrect
-                    ? "border-green-600 bg-green-50 dark:border-green-500 dark:bg-green-950"
-                    : showWrong
-                      ? "border-red-600 bg-red-50 dark:border-red-500 dark:bg-red-950"
-                      : answered
-                        ? "border-zinc-200 opacity-70 dark:border-zinc-800"
-                        : "border-zinc-300 active:bg-zinc-100 dark:border-zinc-700 dark:active:bg-zinc-800")
+                  "choice " +
+                  (showCorrect ? "is-right" : showWrong ? "is-wrong" : answered ? "is-faded" : "")
                 }
               >
-                <span className="min-w-0 break-words">{option.text}</span>
+                <span className="flex min-w-0 items-center gap-3">
+                  <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-2 text-sm font-semibold text-muted">
+                    {String.fromCharCode(65 + oi)}
+                  </span>
+                  <span className="min-w-0 break-words">{option.text}</span>
+                </span>
                 {showCorrect && (
-                  <span className="shrink-0 text-sm font-semibold text-green-800 dark:text-green-300">
+                  <span className="shrink-0 text-sm font-semibold text-good-ink">
                     {isPicked ? "✓ Your answer" : "Correct answer"}
                   </span>
                 )}
                 {showWrong && (
-                  <span className="shrink-0 text-sm font-semibold text-red-800 dark:text-red-300">
+                  <span className="shrink-0 text-sm font-semibold text-bad-ink">
                     ✗ Your answer
                   </span>
                 )}
@@ -109,7 +108,7 @@ export function MultipleChoicePlayer({ activity }: { activity: MultipleChoiceAct
       {answered && (
         <>
           <Feedback right={rules.isRight(state.index, picked)} explanation={question.explanation} />
-          <BigButton onClick={() => dispatch({ type: "next" })} className="sm:w-auto sm:self-end sm:px-10">
+          <BigButton onClick={() => dispatch({ type: "next" })} className="sm:w-auto sm:self-start">
             {last ? "See my score" : "Next"}
           </BigButton>
         </>
